@@ -60,7 +60,7 @@ SSLKEYS=$(SSLCERTS)
 SSLINCLUDE=$(SSLDIR)/include
 SSLLIB=$(SSLDIR)/lib
 
-SSLCRYPTO=-lcrypto
+SSLCRYPTO=-lcrypto -lz
 
 # Older versions of MIT Kerberos also have a libcrypto.  If so, you may need
 # to use this instead
