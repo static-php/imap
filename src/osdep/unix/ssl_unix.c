@@ -37,6 +37,14 @@
 #include <rand.h>
 #undef crypt
 
+/* OpenSSL 1.1.0 added TLS_client_method()/TLS_server_method() and OpenSSL 4.0
+ * removed the version-locked TLSv1_*_method() entry points.  Map the generic
+ * names back to the old ones for pre-1.1.0 builds. */
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#define TLS_client_method() TLSv1_client_method()
+#define TLS_server_method() TLSv1_server_method()
+#endif
+
 #define SSLBUFLEN 8192
 #define SSLCIPHERLIST "ALL:!LOW"
 
@@ -220,7 +228,7 @@ static char *ssl_start_work (SSLSTREAM *stream,char *host,unsigned long flags)
   if (ssl_last_error) fs_give ((void **) &ssl_last_error);
   ssl_last_host = host;
   if (!(stream->context = SSL_CTX_new ((flags & NET_TLSCLIENT) ?
-				       TLSv1_client_method () :
+				       TLS_client_method () :
 				       SSLv23_client_method ())))
     return "SSL context failed";
   SSL_CTX_set_options (stream->context,0);
@@ -723,7 +731,7 @@ void ssl_server_init (char *server)
   }
 				/* create context */
   if (!(stream->context = SSL_CTX_new (start_tls ?
-				       TLSv1_server_method () :
+				       TLS_server_method () :
 				       SSLv23_server_method ())))
     syslog (LOG_ALERT,"Unable to create SSL context, host=%.80s",
 	    tcp_clienthost ());
